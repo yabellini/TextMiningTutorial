@@ -20,6 +20,44 @@ library(tidyr)
 library(tibble)
 library(ggplot2)
 library(magrittr)
+
+## Dataset con versos para trabajar en los ejemplos
+limericks <- c("Siempre de frac y con zapatos finos,",
+              "No parece que fueran argentinos.",
+              "por que, por que sera", 
+              "Que no usan chiripa", 
+              "Ni poncho ni alpargatas los pinguinos?",
+              "Un hipopotamo tan chiquitito",
+              "Que parezca de lejos un mosquito,",
+              "Que se pueda hacer upa",
+              "Y mirarlo con lupa,",
+              "Debe de ser un hipopotamito",
+              "Si un toro, en vez de ser todo de cuero, ",
+              "Es de plumas y vuela muy ligero, ",
+              "Si tiene dos patitas muy largas y finitas... ",
+              "Basta, ya se: no es toro sino tero.",
+              "En el medio del mar nada un atun",
+              "Estilo mariposa y al tuntun",
+              "Nadando a la carrera", 
+              "Quizas ganar espera",
+              "Si no la maraton, la maratun",
+              "Si alguna vez conocen una trucha",
+              "Que en un arbol muy alto hizo la cucha,",
+              "Que solamente nada",
+              "En agua no mojada,",
+              "Senores, esa trucha esta enfermucha.",
+              "En Tucuman vivia una tortuga",
+              "viejisima pero sin una sola arruga,",
+              "porque en toda ocasion",
+              "tuvo la precaucion",
+              "de comer bien planchada la lechuga.")
+
+limericks_df <- tibble(line = 1:29, text = limericks)
+
+limericks_df <- limericks_df %>%
+  unnest_tokens(palabra, text)
+
+stopwords_web<- read.csv("https://bitsandbricks.github.io/data/stopwords_es.csv")
 ```
 
 
@@ -240,7 +278,106 @@ limericks_df %>%
 
 ```
 
+### Palabras comunes o stop words
 
+Como podemos ver en el listado las palabras que aparecen más veces son palabras que no son útiles para un análisis, generalmente palabras extremadamente comunes como los artículos y conectores, por ejemplo, "la", "el", "y", "con", en español.
+
+Para poder remover esas palabras, primero necesitamos un data frame que las liste. Ejecuta el siguiente código para descargar un listado de _stop words_ en español del sitio "Bits & Bricks", mantenido por el científico de datos _Antonio Vázquez Brust_
+
+```{r stop_words, exercise = TRUE}
+
+stopwords_web<- read.csv("https://bitsandbricks.github.io/data/stopwords_es.csv")
+
+head(stopwords_web)
+
+
+```
+### 
+
+Ahora que tenemos el listado de stop words, podemos sacarlas del conjunto de palabras de los versos haciendo un `anti_join` entre ambos datasets.
+
+La función `anti_join` necesita como parámetros los dos dataset a unir y luego las columnas por las cuales se realiza la unión.  En el siguiente código, los dataset son _limericks_df_ y _stopwords_web_.  El parámetro `by` recibe los nombres de las columnas, en este caso _cuando_ la _columna palabra_ del dataset de los limericks _sea igual_ a la _columna STOPWORD_ del dataset de las stop word, la fila se elimina del listado.
+
+Ejecuta este código para ver el resultado
+
+
+```{r anti_join, exercise = TRUE, setup.exercise = "stop_words"}
+
+limericks_df_filtrado <- limericks_df %>% 
+  anti_join(stopwords_web, by = c( "palabra" = "STOPWORD"))
+
+limericks_df_filtrado
+```
+
+###
+
+Ahora vamos a ver de nuevo nuestra frecuencia de palabras.  Completa el siguiente código para ver ahora cuales son las palabras que más se repiten:
+
+```{r frecuencia_nueva, exercise = TRUE, setup.exercise = "anti_join"}
+
+limericks_df_filtrado <- limericks_df %>% 
+  anti_join(stopwords_web, by = c( "palabra" = "STOPWORD"))
+
+limericks_df_filtrado %>%
+  _______(palabra, sort = TRUE) 
+
+```
+
+```{r frecuencia_nueva-solution}
+limericks_df_filtrado <- limericks_df %>% 
+  anti_join(stopwords_web, by = c( "palabra" = "STOPWORD"))
+
+limericks_df_filtrado %>%
+  count(palabra, sort = TRUE) 
+
+```
+
+### Mensaje
+
+Perfecto, como vemos en el resultado ahora las palabras que más se repiten son _toro_, _trucha_ y _vez_. 
+
+Como ejercicio final, realizaremos un gráfico de las 10 primeras palabras.  Para hacer eso, ejecuta el siguiente código:
+
+```{r grafico, exercise = TRUE}
+limericks_df_filtrado <- limericks_df %>% 
+  anti_join(stopwords_web, by = c( "palabra" = "STOPWORD"))
+
+limericks_df_filtrado %>%
+  count(palabra, sort = TRUE) %>%
+  filter(n > 1) %>%
+  mutate(palabra = reorder(palabra, n)) %>%
+  ggplot(aes(n, palabra)) +
+  geom_col() +
+  labs(y = NULL)
+
+
+```
+
+### 
+
+Recien visualizamos solo las 3 palabras que aparecen más de una vez, modifiquen el código para visualizar todas las palabras y no solo las que aparecen más de una vez:
+
+```{r grafico_2, exercise = TRUE}
+limericks_df_filtrado <- limericks_df %>% 
+  anti_join(stopwords_web, by = c( "palabra" = "STOPWORD"))
+
+limericks_df_filtrado %>%
+  count(palabra, sort = TRUE) %>%
+  filter(n > 1) %>%
+  mutate(palabra = reorder(palabra, n)) %>%
+  ggplot(aes(n, palabra)) +
+  geom_col() +
+  labs(y = NULL)
+
+```
+
+### Mensaje
+
+Muy bien! solo es necesario sacar el verbo `filter` o bien cambiar el valor 1 por 0 en el código.
+
+Con esto hemos repasado las funciones básicas para transformar texto en texto ordenado, tokenizar un conjunto de datos, remover stop words, calcular frecuencias de palabras y graficarlas.
+
+Para seguir aprendiendo revisa nuestras fuentes en la siguiente sección.
 
 ## Fuentes
 
