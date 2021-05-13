@@ -1,0 +1,141 @@
+---
+title: "Introducción a Text Mining"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = FALSE)
+library(tidytext)
+library(dplyr)
+library(tidyr)
+library(tibble)
+library(ggplot2)
+```
+
+
+## El formato tidy para texto
+
+El uso de principios de datos ordenados es una forma poderosa para hacer que el manejo de datos sea más fácil y efectivo. Esto también aplica cuando trabajamos con texto. Los datos ordenados o **tidy** tienen una estructura específica:
+
+  * Cada _variable_ es una _columna_.
+  * Cada _observación_ es una _fila_.
+  * Cada _tipo de unidad de observación_ es una _tabla_.
+
+Teniendo en cuenta esta definición, el formato de texto ordenado (tidy text) es una _tabla_ con un _token_ por _fila_. 
+
+Un _token_ es una _unidad significativa de texto_, como una _palabra_, que queremos usar para el análisis, y la _tokenización_ es el proceso de _dividir el texto_ en _tokens_. 
+
+Para una minería de texto ordenada, el _token_ que se almacena en cada _fila_ suele ser _una sola palabra_, pero también puede ser un _n-grama_, una _oración_ o un _párrafo_. El paquete `tidytext`, proporciona las funciones para tokenizar por unidades de texto de uso común como las mencionadas y convertirlas a un formato de un término por fila.
+
+Además, contar con el texto en un formato tidy, nos permitirá usar los paquetes del _tidyverse_ para trabajar con los datos.
+
+### Trabajando con texto 
+
+Vamos a conocer las funciones fundamentales para ordenar nuestro texto, sigamos el orden de los siguientes ejercicios para ver como trabaja la función `unnest_tokens`. 
+
+María Elena Walsh escribió un hermoso libro llamado _Zoo Loco_ que contiene _limericks_: versos que riman y no tienen mucho sentido y por eso son muy graciosos.  Ejecuta el siguiente código para generar un _vector de caracteres_ en R con el limericks.
+
+_Nota: vamos a usar el texto sin acentos para evitar problemas de codificación, pero más adelante veremos como resolverlos_
+
+```{r vector_texto, exercise=TRUE}
+
+text <- c("En Tucuman vivia una tortuga",
+          "viejisima pero sin una sola arruga,",
+          "porque en toda ocasion",
+          "tuvo la precaucion",
+          "de comer bien planchada la lechuga.")
+
+text
+```
+Este es un vector de caracteres típico que podríamos querer analizar. Para convertirlo en un conjunto de datos de texto ordenado, primero debemos colocarlo en un data frame.  Ejecuta el código para ver el resultado.
+
+```{r convertir_data_frame, exercise = TRUE, exercise.setup = "vector_texto"}
+
+text_df <- tibble(line = 1:5, text = text)
+
+text_df
+
+```
+
+###
+
+Ya tenemos nuestro limerick en un _tibble_, sin embargo, el texto aún no es compatible con un análisis de texto ordenado. No podemos filtrar las palabras ni contar las que ocurren con mayor frecuencia, ya que cada fila está formada por varias palabras combinadas. Necesitamos convertir este texto para que tenga _un token por documento por fila_.
+
+**Un token es una unidad significativa de texto, generalmente una palabra, que queremos en usar para un análisis más detallado, y la tokenización es el proceso de dividir el texto en tokens.**
+
+En este primer ejemplo, solo tenemos un documento (el limerick), pero en general trabajaremos con datos de varios documentos.
+
+Dentro de nuestro tibble, necesitamos dividir el texto en tokens individuales (un proceso llamado tokenización) y transformarlo en una estructura de datos ordenada. Para hacer esto, usamos la función `unnest_tokens()` del paquete `tidytext`.
+
+Ejecuta el siguiente código para ver como trabaja esta función.
+
+```{r tokenizar, exercise = TRUE, exercise.setup = "convertir_data_frame"}
+
+library(tidytext)
+
+text_df %>%
+  unnest_tokens(palabra, text)
+
+```
+
+Los dos argumentos básicos para `unnest_tokens` son: 
+
+* El nombre de la columna que se creará cuando el texto se separe en tokens, en este caso el nombre es _palabra_. 
+* La columna de entrada de la que proviene el texto: _text_ en este caso. 
+
+Recordemos que _text_df_ creado en el ejercicio anterior tiene una columna llamada _text_ que contiene los datos de interés.
+
+Después de usar `unnest_tokens`, dividimos cada fila original para que genere una fila por cada token (palabra) en el nuevo tibble; la tokenización predeterminada en `unnest_tokens()` es para palabras individuales, como en este ejemplo. La funcion también hace otras tareas por defecto:
+
+  * Se conservan otras columnas, como el número de línea de donde proviene cada palabra.
+  * Se elimina la puntuación (las comas no están más, en este ejemplo).
+  * Se convierten los tokens a minúsculas, lo que los hace más fáciles de comparar o combinar con otros conjuntos de datos. (El argumento `to_lower = FALSE` desactiva este comportamiento).
+
+Con los datos de texto en este formato ordenado, podemos procesarlos y visualizarlos usando las herramientas estándar para datos tidy, como `dplyr`, `tidyr` y `ggplot2`.
+
+### Ordenando más limericks
+
+
+```{r limericks, include=FALSE}
+
+limericks <- c("Siempre de frac y con zapatos finos,",
+              "No parece que fueran argentinos.",
+              "¿por que, por que sera", 
+              "Que no usan chiripa", 
+              "Ni poncho ni alpargatas los pinguinos?",
+              "Un hipopotamo tan chiquitito",
+              "Que parezca de lejos un mosquito,",
+              "Que se pueda hacer upa",
+              "Y mirarlo con lupa,",
+              "Debe de ser un hipopotamito",
+              "Si un toro, en vez de ser todo de cuero, ",
+              "Es de plumas y vuela muy ligero, ",
+              "Si tiene dos patitas muy largas y finitas... ",
+              "Basta, ya se: no es toro sino tero.",
+              "En el medio del mar nada un atun",
+              "Estilo mariposa y al tuntun",
+              "Nadando a la carrera", 
+              "Quizas ganar espera",
+              "Si no la maratón, la maratun",
+              "Si alguna vez conocen una trucha",
+              "Que en un arbol muy alto hizo la cucha,",
+              "Que solamente nada",
+              "En agua no mojada,",
+              "Señores, esa trucha esta enfermucha.",
+              "En Tucuman vivia una tortuga",
+              "viejisima pero sin una sola arruga,",
+              "porque en toda ocasion",
+              "tuvo la precaucion",
+              "de comer bien planchada la lechuga.")
+
+
+```
+
+
+## Fuentes
+
+* Libro Text Minig with R. Julia Silge and David Robinson. https://www.tidytextmining.com/index.html 
+
+* Libro Zoo Loco. María Elena Walsh. https://g.co/kgs/vagz5F
