@@ -225,8 +225,20 @@ limericks_df
 
 Si recorremos el tibble veremos que hay algunas palabras que se repiten, para saber cuantas veces aparece una palabra podemos contarlas.
 
-Y como el texto ahora tiene un formato _tidy_ 
+Y como el texto ahora tiene un formato _tidy_ podemos usar los verbos de los paquetes del tidyverse, como por ejemplo la función `count()` para mostrar las palabras más comunes en todos los versos.
 
+Ejecuta el siguiente código para ver cuantas veces aparece cada palabra
+
+```{r cantidad_palabras, exercise = TRUE, exercise.setup = "limericks"}
+limericks_df <- tibble(line = 1:29, text = limericks)
+
+limericks_df <- limericks_df %>%
+  unnest_tokens(palabra, text)
+
+limericks_df %>%
+  count(palabra, sort = TRUE) 
+
+```
 
 
 
