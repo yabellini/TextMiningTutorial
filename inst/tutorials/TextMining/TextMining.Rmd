@@ -1,7 +1,14 @@
 ---
 title: "Introducción a Text Mining"
-output: learnr::tutorial
+output:
+  learnr::tutorial:
+    language: es
+    progressive: true
+    allow_skip: true
 runtime: shiny_prerendered
+tutorial:
+  version: 1.0
+description: "Tutorial de introducción al paquete tidytext para trabajar con texto"
 ---
 
 ```{r setup, include=FALSE}
@@ -12,6 +19,7 @@ library(dplyr)
 library(tidyr)
 library(tibble)
 library(ggplot2)
+library(magrittr)
 ```
 
 
@@ -35,9 +43,11 @@ Además, contar con el texto en un formato tidy, nos permitirá usar los paquete
 
 Vamos a conocer las funciones fundamentales para ordenar nuestro texto, sigamos el orden de los siguientes ejercicios para ver como trabaja la función `unnest_tokens`. 
 
-María Elena Walsh escribió un hermoso libro llamado _Zoo Loco_ que contiene _limericks_: versos que riman y no tienen mucho sentido y por eso son muy graciosos.  Ejecuta el siguiente código para generar un _vector de caracteres_ en R con el limericks.
+María Elena Walsh escribió un hermoso libro llamado _Zoo Loco_ que contiene _limericks_: versos que riman y no tienen mucho sentido y por eso son muy graciosos.  _Nota: vamos a usar el texto sin acentos para evitar problemas de codificación, pero más adelante veremos como resolverlos_
 
-_Nota: vamos a usar el texto sin acentos para evitar problemas de codificación, pero más adelante veremos como resolverlos_
+Ejecuta el siguiente código para generar un _vector de caracteres_ en R con el limericks.
+
+
 
 ```{r vector_texto, exercise=TRUE}
 
@@ -49,6 +59,11 @@ text <- c("En Tucuman vivia una tortuga",
 
 text
 ```
+
+### Mensaje
+
+Buen trabajo! Usaremos fragmentos de código interactivos como este en el tutorial. Siempre que encuentres uno, puedes hacer clic en _Ejecutar código_ para ejecutar el código escrito. Si hay un botón _Pista_ o _Solución_, puedes hacer clic para recibir ayuda y/o ver la respuesta.
+
 Este es un vector de caracteres típico que podríamos querer analizar. Para convertirlo en un conjunto de datos de texto ordenado, primero debemos colocarlo en un data frame.  Ejecuta el código para ver el resultado.
 
 ```{r convertir_data_frame, exercise = TRUE, exercise.setup = "vector_texto"}
@@ -79,8 +94,9 @@ text_df %>%
   unnest_tokens(palabra, text)
 
 ```
+### La función `unnest_tokens`
 
-Los dos argumentos básicos para `unnest_tokens` son: 
+Buen trabajo!. El código anterior nos permitió usar dos argumentos básicos de la función `unnest_tokens`: 
 
 * El nombre de la columna que se creará cuando el texto se separe en tokens, en este caso el nombre es _palabra_. 
 * La columna de entrada de la que proviene el texto: _text_ en este caso. 
@@ -97,12 +113,13 @@ Con los datos de texto en este formato ordenado, podemos procesarlos y visualiza
 
 ### Ordenando más limericks
 
+Ahora que sabemos usar esta función vamos a ordenar más limericks de Zoo Loco.  Ejecuta el siguiente código para generar el set de datos de limericks que vamos a usar en el resto de los ejercicios:
 
-```{r limericks, include=FALSE}
+```{r limericks, exercise = TRUE}
 
 limericks <- c("Siempre de frac y con zapatos finos,",
               "No parece que fueran argentinos.",
-              "¿por que, por que sera", 
+              "por que, por que sera", 
               "Que no usan chiripa", 
               "Ni poncho ni alpargatas los pinguinos?",
               "Un hipopotamo tan chiquitito",
@@ -118,20 +135,99 @@ limericks <- c("Siempre de frac y con zapatos finos,",
               "Estilo mariposa y al tuntun",
               "Nadando a la carrera", 
               "Quizas ganar espera",
-              "Si no la maratón, la maratun",
+              "Si no la maraton, la maratun",
               "Si alguna vez conocen una trucha",
               "Que en un arbol muy alto hizo la cucha,",
               "Que solamente nada",
               "En agua no mojada,",
-              "Señores, esa trucha esta enfermucha.",
+              "Senores, esa trucha esta enfermucha.",
               "En Tucuman vivia una tortuga",
               "viejisima pero sin una sola arruga,",
               "porque en toda ocasion",
               "tuvo la precaucion",
               "de comer bien planchada la lechuga.")
 
+limericks
+```
+### Mensaje
+
+¡Muy bien!, ahora tenemos un vector con 29 líneas de texto de cuatro limericks de Zoo Loco.
+
+### Transformando los limericks en un tibble
+
+Teniendo en cuenta los ejercicios anteriores, completa el siguiente código para generar un tibble con los datos, prueba ejecutando el código para ver si funcionó. 
+
+```{r convertir_data_frame_limericks, exercise = TRUE, exercise.setup = "limericks"}
+
+limericks_df <- ____________(line = 1:__, text = text)
+
+limericks_df
 
 ```
+
+```{r convertir_data_frame_limericks-hint-1}
+
+Recuerda que la función para generar un data frame se llama tibble.
+  
+```
+
+```{r convertir_data_frame_limericks-hint-2}
+
+El vector limericks tiene 29 filas.
+  
+```
+
+```{r convertir_data_frame_limericks-solution}
+
+limericks_df <- tibble(line = 1:29, text = limericks)
+
+limericks_df
+  
+```
+
+### Mensaje
+
+¡Excelente!, Ya convertiste el vector en un tibble, ahora convirtamos el tibble de los limericks en un conjunto de dato ordenados, donde cada palabra sea una fila.  
+
+Completa el siguiente código para realizar esta tarea.
+
+```{r limericks_tidy, exercise = TRUE, exercise.setup = "limericks"}
+
+limericks_df <- tibble(line = 1:29, text = limericks)
+
+limericks_df <- limericks_df %>%
+  __________(__________, text)
+
+limericks_df
+```
+
+```{r limericks_tidy-hint}
+limericks_df <- tibble(line = 1:29, text = limericks)
+
+limericks_df <- limericks_df %>%
+  unnest_tokens(_____________, text)
+
+limericks_df
+```
+
+```{r limericks_tidy-solution}
+limericks_df <- tibble(line = 1:29, text = limericks)
+
+limericks_df <- limericks_df %>%
+  unnest_tokens(palabra, text)
+
+limericks_df
+```
+
+### Vamos a contar palabras
+
+¡Buen trabajo! En el tibble `limericks_df` ahora tenemos 161 filas, una por cada palabra que se encontraba en los versos.
+
+Si recorremos el tibble veremos que hay algunas palabras que se repiten, para saber cuantas veces aparece una palabra podemos contarlas.
+
+Y como el texto ahora tiene un formato _tidy_ 
+
+
 
 
 ## Fuentes
@@ -139,3 +235,11 @@ limericks <- c("Siempre de frac y con zapatos finos,",
 * Libro Text Minig with R. Julia Silge and David Robinson. https://www.tidytextmining.com/index.html 
 
 * Libro Zoo Loco. María Elena Walsh. https://g.co/kgs/vagz5F
+
+## Licencia
+
+```{r, echo=FALSE, fig.align = "left"}
+knitr::include_graphics("images/CC_BY-SA_4.0.png")  
+```
+
+Este curso se comparte bajo la licencia [Creative Commons Attribution-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-sa/4.0/deed.es_ES) y fue realizado por [Yanina Bellini Saibene](https://yabellini.netlify.app/)
