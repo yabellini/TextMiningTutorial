@@ -16,7 +16,8 @@ remotes::install_github("yabellini/TextMiningTutorial")
 ```
 Puede ser que si hay versiones más nuevas de los paquetes que necesitas en la consola te aparezca un mensaje similar a este:
 
-`
+
+``` r
 These packages have more recent versions available.
 It is recommended to update all of them.
 Which would you like to update?
@@ -29,7 +30,8 @@ Which would you like to update?
  6: glue       (1.4.0  -> 1.4.2 ) [CRAN]
  
  Enter one or more numbers, or an empty line to skip updates:
-` 
+
+``` 
 Ese mensaje nos indica que paquetes podríamos actualizar. Si no queremos actualizar podemos presionar `Enter` o bien seleccionar el número que dice _None_, en este caso el 3. 
 
 Si no tenes la ultima versión de RStudio entonces tenés que instalar el paquete [learnr](https://rstudio.github.io/learnr/index.html) utilizando el siguiente código:
